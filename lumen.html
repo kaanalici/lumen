@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Lumen Assistant</title>
+<style>
+*{box-sizing:border-box;font-family:Segoe UI}
+body{
+    margin:0;
+    background:radial-gradient(circle at top,#1b2a4a,#05070f);
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+}
+.container{
+    width:420px;
+    background:rgba(20,30,60,.55);
+    backdrop-filter:blur(20px);
+    border-radius:30px;
+    padding:25px;
+    box-shadow:0 0 40px rgba(80,120,255,.4);
+    text-align:center;
+}
+.title{font-size:28px;font-weight:600}
+.sub{opacity:.7;margin-bottom:10px}
+.circle{
+    width:130px;height:130px;border-radius:50%;
+    background:linear-gradient(135deg,#4f7cff,#6df1ff);
+    margin:15px auto;
+    display:flex;align-items:center;justify-content:center;
+    font-size:50px;cursor:pointer;
+    box-shadow:0 0 25px #5fa8ff;
+}
+.circle.listening{animation:pulse 1s infinite}
+@keyframes pulse{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.1)}
+    100%{transform:scale(1)}
+}
+.log{
+    height:160px;
+    overflow-y:auto;
+    background:rgba(255,255,255,.05);
+    border-radius:15px;
+    padding:10px;
+    text-align:left;
+}
+.user{color:#7fd1ff;margin:4px 0}
+.bot{color:white;margin:4px 0}
+.chatbar{
+    display:flex;
+    margin-top:10px;
+    gap:6px;
+}
+.chatbar input{
+    flex:1;
+    background:rgba(255,255,255,.1);
+    border:none;
+    outline:none;
+    color:white;
+    padding:10px;
+    border-radius:10px;
+}
+.chatbar button{
+    background:#4f7cff;
+    border:none;
+    color:white;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.footer{font-size:12px;opacity:.6;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="title">LUMEN</div>
+    <div class="sub">Yapımcı: Kaan Alıcı</div>
+    <div class="circle" id="mic">🎤</div>
+    <div class="log" id="log"></div>
+    <div class="chatbar">
+        <input id="textInput" placeholder="Lumen'e yaz..." />
+        <button id="send">➤</button>
+    </div>
+    <div class="footer">Voice + Text Assistant</div>
+</div>
+
+<script>
+const mic = document.getElementById("mic");
+const log = document.getElementById("log");
+const synth = speechSynthesis;
+const input = document.getElementById("textInput");
+const send = document.getElementById("send");
+let recognition;
+
+function add(type,text){
+    log.innerHTML += `<div class="${type}">${text}</div>`;
+    log.scrollTop = log.scrollHeight;
+}
+
+function speak(text){
+    add("bot","Lumen: " + text);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang="tr-TR";
+    synth.speak(u);
+}
+
+mic.onclick = ()=>{
+    if(recognition && recognition.running) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang="tr-TR";
+    mic.classList.add("listening");
+    recognition.start();
+
+    recognition.onresult = e=>{
+        mic.classList.remove("listening");
+        const cmd = e.results[0][0].transcript.toLowerCase();
+        add("user","Sen: " + cmd);
+        handle(cmd);
+    }
+
+    recognition.onend = ()=>{
+        mic.classList.remove("listening");
+    }
+}
+
+send.onclick = sendText;
+input.onkeydown = e=>{ if(e.key==="Enter") sendText(); }
+
+function sendText(){
+    if(!input.value) return;
+    const cmd = input.value.toLowerCase();
+    add("user","Sen: " + cmd);
+    input.value="";
+    handle(cmd);
+}
+
+function handle(cmd){
+    if(cmd.includes("patron geldi")){
+        speak("Hoş geldin Patron. Her şeyi açıyorum.");
+        const urls=[
+            "https://open.spotify.com",
+            "https://github.com/kaanalici",
+            "https://colab.research.google.com",
+            "https://sites.google.com/view/kaos-1/resepsiyon"
+        ];
+        urls.forEach(u=>window.open(u,"_blank"));
+    }
+    else if(cmd.startsWith("arat")){
+        let q=cmd.replace("arat","").trim();
+        if(q){speak(q+" için Google'da arıyorum.");window.open("https://google.com/search?q="+encodeURIComponent(q));}
+    }
+    else if(cmd.startsWith("şarkı çal")){
+        let q=cmd.replace("şarkı çal","").trim();
+        if(q){speak(q+" için Spotify'da arıyorum.");window.open("https://open.spotify.com/search/"+encodeURIComponent(q));}
+    }
+    else if(cmd.includes("github")){
+        speak("GitHub açılıyor.");window.open("https://github.com/kaanalici");
+    }
+    else if(cmd.includes("sitemi aç")){
+        speak("Siten açılıyor.");window.open("https://sites.google.com/view/kaos-1/resepsiyon");
+    }
+    else speak("Bu komutu henüz bilmiyorum.");
+}
+
+speak("Merhaba. Ben Lumen.");
+</script>
+</body>
+</html>
