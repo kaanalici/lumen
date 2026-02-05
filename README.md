@@ -2,6 +2,10 @@ kullanmak için: https://kaanalici.github.io/lumen/
 YAPIMCI: KAAN ALICI
 
 
+
+web sitesi: https://sites.google.com/view/kaos-1/resepsiyon
+
+
 ---------------------------KOMUTLAR-------------------------------------
 Lumen User Guide
 
